@@ -3,7 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/M.Moin Raza Khan/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/M.Moin Raza Khan/AndroidStudioProjects/TouristAssistant/app/src/main/res/drawable/ic_baseline_cleaning_services_24.xml" value="0.11614583333333334" />
+        <entry key="..\:/Users/M.Moin Raza Khan/AndroidStudioProjects/TouristAssistant/app/src/main/res/drawable/ic_baseline_tour_24.xml" value="0.11614583333333334" />
+        <entry key="..\:/Users/M.Moin Raza Khan/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/activity_main.xml" value="0.18" />
+        <entry key="..\:/Users/M.Moin Raza Khan/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/fragment_main.xml" value="0.1" />
+        <entry key="..\:/Users/M.Moin Raza Khan/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/fragment_map.xml" value="0.18" />
+        <entry key="..\:/Users/M.Moin Raza Khan/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/item_location.xml" value="0.18" />
+        <entry key="..\:/Users/M.Moin Raza Khan/AndroidStudioProjects/TouristAssistant/app/src/main/res/menu/top_nav_menu.xml" value="0.25" />
       </map>
     </option>
   </component>

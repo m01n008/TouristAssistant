@@ -1,4 +1,8 @@
 <resources>
-    <string name="app_name">TouristAssistant</string>
-    <string name = "MAPS_API_KEY">AIzaSyABgNaYFBTwoQl_LGUtXDx2w8F7lwHILd0</string>
+    <string name="app_name">Tourist\nAssistant</string>
+    <string name="tourist_assistant">Tourist Assistant</string>
+    <string name="attractions">Attractions</string>
+    <string name="services">Services</string>
+    <string name="MAP_API_KEY">AIzaSyA8jIq9C_NpQTDNa2cPF-iAPE3NrijnJnA</string>
+
 </resources>

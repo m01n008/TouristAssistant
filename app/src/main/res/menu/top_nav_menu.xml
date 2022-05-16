@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+      android:id="@+id/attraction_option"
+      android:title="@string/attractions"
+      android:icon="@drawable/ic_baseline_tour_24"
+    />
+    <item
+        android:id="@+id/services_option"
+        android:title="@string/attractions"
+        android:icon="@drawable/ic_baseline_cleaning_services_24"
+        />
+
+
+
+</menu>
