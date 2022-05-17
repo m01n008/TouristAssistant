@@ -2,6 +2,7 @@ package com.project.ta.data.datasource.remote.api
 
 import com.project.ta.BuildConfig
 import com.project.ta.data.datasource.GoogleMapServiceResponse
+import com.project.ta.data.datasource.remote.LocationPhoto
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -24,8 +25,8 @@ interface GoogleMapService {
     suspend fun getLocationPhoto(
         @Query("maxwidth") maxWidth: Int,
         @Query("photo_reference") photoReference: String,
-        @Query("key") apiKey: String
-    ): GoogleMapServiceResponse
+        @Query("key") apiKey: String = BuildConfig.MAP_API_KEY
+    ): ByteArray
 
 
 
@@ -46,9 +47,8 @@ interface GoogleMapService {
                 .create(GoogleMapService::class.java)
 
 
-
-
         }
+
 
 
 

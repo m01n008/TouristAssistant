@@ -6,9 +6,5 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.project.ta.presentation.ui.fragments.MainFragment"
-        android:label="MainFragment" >
-        <action
-            android:id="@+id/action_mainFragment_self"
-            app:destination="@id/mainFragment" />
-    </fragment>
+        android:label="MainFragment" />
 </navigation>

@@ -1,5 +1,6 @@
 package com.project.ta.domain
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import com.project.ta.data.datasource.NearestLocationDetails
 import com.project.ta.data.repository.LocationDetailsRepository
@@ -27,6 +28,10 @@ class MapViewModel @Inject constructor(
         currentServicesLocationsResult = latestResult
         return latestResult
 
+    }
+    suspend fun getPhoto(pf: String):Bitmap{
+        val latestResult = locationDetailsRepository.get200WidthPhoto(pf)
+        return latestResult
     }
 
 
