@@ -11,8 +11,10 @@ import com.bumptech.glide.request.RequestOptions
 import com.project.ta.R
 import kotlinx.coroutines.NonCancellable.start
 import java.io.ByteArrayOutputStream
+import java.io.File
 
-    fun toBitmap(byteArray: ByteArray): Bitmap {
+
+fun toBitmap(byteArray: ByteArray): Bitmap {
         return BitmapFactory.decodeByteArray(byteArray,0,byteArray.size)
     }
 
@@ -21,6 +23,11 @@ import java.io.ByteArrayOutputStream
         val outputStream  = ByteArrayOutputStream()
         bmp.compress(Bitmap.CompressFormat.PNG,100,outputStream);
         return outputStream.toByteArray()
+    }
+    fun filetoBitmap(file: File): Bitmap? {
+        val filePath: String = file.getPath()
+        val bitmap = BitmapFactory.decodeFile(filePath)
+         return bitmap
     }
 
 fun getProgressDrawable(context: Context): CircularProgressDrawable {

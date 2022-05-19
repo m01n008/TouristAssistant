@@ -1,5 +1,7 @@
 package com.project.ta.data.datasource.remote.api
 
+import android.graphics.Bitmap
+import android.media.Image
 import com.project.ta.BuildConfig
 import com.project.ta.data.datasource.GoogleMapServiceResponse
 import com.project.ta.data.datasource.remote.LocationPhoto
@@ -9,6 +11,14 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.io.File
+import java.net.URL
+import com.google.gson.GsonBuilder
+
+import com.google.gson.Gson
+
+
+
 
 
 interface GoogleMapService {
@@ -21,12 +31,12 @@ interface GoogleMapService {
         @Query("key") apiKey: String = BuildConfig.MAP_API_KEY
     ): GoogleMapServiceResponse
 
-    @GET("/photo")
+    @GET("photo")
     suspend fun getLocationPhoto(
         @Query("maxwidth") maxWidth: Int,
         @Query("photo_reference") photoReference: String,
         @Query("key") apiKey: String = BuildConfig.MAP_API_KEY
-    ): ByteArray
+    ): String?
 
 
 
@@ -39,10 +49,14 @@ interface GoogleMapService {
 
             val client = OkHttpClient.Builder().addInterceptor(logger).build()
 
+            val gson = GsonBuilder()
+                .setLenient()
+                .create()
+
             return Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
                 .create(GoogleMapService::class.java)
 

@@ -1,4 +1,4 @@
-package com.project.ta.presentation.ui
+package com.project.ta.presentation.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +11,6 @@ import com.project.ta.data.datasource.NearestLocationDetails
 import com.project.ta.util.getDistanceInKms
 import com.project.ta.util.getProgressDrawable
 import com.project.ta.util.loadImage
-import com.project.ta.util.toBitmap
 
 class LocationListAdapter(var nearestLocations: ArrayList<NearestLocationDetails>): RecyclerView.Adapter<LocationListAdapter.LocationViewHolder>() {
 
@@ -44,8 +43,8 @@ class LocationListAdapter(var nearestLocations: ArrayList<NearestLocationDetails
             var distance: Double = getDistanceInKms(-33.8670522,151.1957362,nearestLocationDetails.geometry.locationCoordinates.lat,nearestLocationDetails.geometry.locationCoordinates.lng)
             distanceInKms.text =String.format("%.2f", distance);
             distanceInKms.append(" KM")
-//            locationImg.setImageBitmap()
-            locationImg.loadImage(nearestLocationDetails.icon,progressDrawable)
+//            locationImg.setImageBitmap(nearestLocationDetails.bmp)
+            locationImg.loadImage(nearestLocationDetails.photoURL,progressDrawable)
         }
     }
 }

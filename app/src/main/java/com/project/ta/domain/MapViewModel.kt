@@ -29,7 +29,7 @@ class MapViewModel @Inject constructor(
         return latestResult
 
     }
-    suspend fun getPhoto(pf: String):Bitmap{
+    suspend fun getPhoto(pf: String):String?{
         val latestResult = locationDetailsRepository.get200WidthPhoto(pf)
         return latestResult
     }

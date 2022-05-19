@@ -10,5 +10,5 @@ data class NearestLocationDetails(
     @field:SerializedName("name") val placeName: String,
     @field:SerializedName("icon") val icon: String,
     @field:SerializedName("photos") val photos: List<LocationPhoto>,
-    var bmp: Bitmap
+    var photoURL: String
 )

@@ -1,30 +1,28 @@
 package com.project.ta.presentation.ui.fragments
 
 import android.Manifest
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.GoogleMap
-import com.google.maps.android.compose.Marker
 import com.project.ta.R
+import com.project.ta.data.datasource.NearestLocationDetails
 import com.project.ta.data.datasource.remote.LocationPhoto
 import com.project.ta.domain.MapViewModel
-import com.project.ta.presentation.ui.LocationListAdapter
+import com.project.ta.presentation.ui.adapters.LocationListAdapter
 import com.project.ta.util.PermissionUtility
 import com.project.ta.util.REQUEST_CODE_LOCATION_PERMISSION
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_main.*
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 
@@ -33,21 +31,27 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 
     private val mapViewModel: MapViewModel by viewModels()
     private var getMapDataJob: Job? = null
+    private var getImgDataJob: Job? = null
     private var map: GoogleMap? = null
     private val locationListAdapter = LocationListAdapter(arrayListOf())
+    private val photoReferenceList: MutableList<String> = arrayListOf()
+    private var nearestLocationDetails: List<NearestLocationDetails>? = null
+    var photoURLList: MutableList<String> = mutableListOf()
+    var photoURL: String? = null
     private lateinit var photoList: List<LocationPhoto>
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { map = it  }
+        mapView.getMapAsync { map = it }
 
         requestPermissions()
-        recyclerViewLocation.apply{
+        recyclerViewLocation.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = locationListAdapter
         }
-
-        observeData()
+        populateData()
+//        observeData()
+//        setImages()
     }
 
     override fun onResume() {
@@ -57,7 +61,8 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 
     override fun onStart() {
         super.onStart()
-        mapView?.onStart()    }
+        mapView?.onStart()
+    }
 
     override fun onPause() {
         super.onPause()
@@ -73,6 +78,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
         super.onStop()
         mapView?.onStop()
     }
+
     override fun onDestroy() {
         super.onDestroy()
         mapView?.onDestroy()
@@ -85,42 +91,39 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     }
 
 
-
-    
-
-
-    private fun requestPermissions(){
-        if(PermissionUtility.hasLocationPermissions(requireContext())){
+    private fun requestPermissions() {
+        if (PermissionUtility.hasLocationPermissions(requireContext())) {
 
 
-        }
-        else{
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
-              EasyPermissions.requestPermissions(this,
-                  "you need to accept location permissions to use this app",
-              REQUEST_CODE_LOCATION_PERMISSION,
-              Manifest.permission.ACCESS_COARSE_LOCATION,
-              Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-            else{
-                EasyPermissions.requestPermissions(this,
+        } else {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                EasyPermissions.requestPermissions(
+                    this,
+                    "you need to accept location permissions to use this app",
+                    REQUEST_CODE_LOCATION_PERMISSION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            } else {
+                EasyPermissions.requestPermissions(
+                    this,
                     "you need to accept location permissions to use this app",
                     REQUEST_CODE_LOCATION_PERMISSION,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                )
             }
 
-            }
         }
+    }
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {}
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
-        if(EasyPermissions.somePermissionPermanentlyDenied(this,perms)){
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             AppSettingsDialog.Builder(this).build().show()
-        }
-        else{
+        } else {
             requestPermissions()
         }
     }
@@ -131,29 +134,81 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-       EasyPermissions.onRequestPermissionsResult(requestCode,permissions,grantResults,this)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
-    private fun observeData(){
-        getMapDataJob?.cancel()
-        getMapDataJob = lifecycleScope.launch {
-            mapViewModel.updateCurrentServices().collectLatest {
+    private fun populateData(){
+      getMapDataJob?.cancel()
+      getMapDataJob = lifecycleScope.launch {
+          observeData()
+//          setImages()
+      }
+    }
 
-                    it.forEach {
-                        it.bmp = mapViewModel.getPhoto(it.photos[0].photoReference)
-                    }
 
-                locationListAdapter.updateLocations(it)
 
-                Log.d("--NearestLocDetails: ",it.toString())
+    private suspend fun observeData() {
+//        mapViewModel
+//        getMapDataJob?.cancel()
+//        getMapDataJob = lifecycleScope.launch {
+            mapViewModel.updateCurrentServices().collectLatest { it ->
+//
+//                it.filter { value ->
+//                    photoReferenceList.add(photoList[0].photoReference) }
+//                it.forEach { value ->
+//
+//                    photoReferenceList.add(value.photos[0].photoReference!!)
+////                        it.bmp = mapViewModel.getPhoto(it.photos[0].photoReference)
+//                }
+
+                nearestLocationDetails = it
+//                locationListAdapter.updateLocations(it)
+                nearestLocationDetails?.forEach { value ->
+                    photoReferenceList.add(value.photos[0].photoReference!!)
+
+                Log.d("--NearestLocDetails: ", it.toString())
+
             }
-        }
+
+                Log.d("--photoReferenceList: ", photoReferenceList.toString())
+                locationListAdapter.updateLocations(nearestLocationDetails!!)
+
+            }
+
+
+//            photoReferenceList.forEach { it ->
+//                bmp = mapViewModel.getPhoto(it)
+//                bmpList.add(bmp!!)
+//            }
+//            for (  i in 0..nearestLocationDetails!!.size){
+//                nearestLocationDetails!![i].bmp = bmpList.get(i)
+//            }
+//            locationListAdapter.updateLocations(nearestLocationDetails!!)
+//            getMapDataJob?.join()
+//        }
+
+
 
 
 
     }
+   private suspend fun setImages(){
+//       getImgDataJob?.cancel()
+//       getImgDataJob = lifecycleScope.launch{
+
+           photoReferenceList.forEach { it ->
+               photoURL =  mapViewModel.getPhoto(it)
+               photoURLList.add(photoURL!!)
+
+           }
+           for (  i in 0..nearestLocationDetails!!.size){
+               nearestLocationDetails!![i].photoURL = photoURLList.get(i)
+           }
+           locationListAdapter.updateLocations(nearestLocationDetails!!)
+
+//           }
 
 
 
-
+   }
 }
