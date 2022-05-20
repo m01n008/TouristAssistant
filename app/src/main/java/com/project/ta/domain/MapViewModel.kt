@@ -1,11 +1,14 @@
 package com.project.ta.domain
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import com.project.ta.data.datasource.NearestLocationDetails
 import com.project.ta.data.repository.LocationDetailsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import java.io.IOException
+import java.net.URL
 
 import javax.inject.Inject
 
@@ -33,6 +36,7 @@ class MapViewModel @Inject constructor(
         val latestResult = locationDetailsRepository.get200WidthPhoto(pf)
         return latestResult
     }
+
 
 
 }

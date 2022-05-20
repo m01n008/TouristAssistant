@@ -7,7 +7,6 @@ import com.project.ta.data.datasource.GoogleMapServiceResponse
 import com.project.ta.data.datasource.NearestLocationDetails
 import com.project.ta.data.datasource.remote.LocationPhoto
 import com.project.ta.data.datasource.remote.api.GoogleMapService
-import com.project.ta.util.filetoBitmap
 import com.project.ta.util.toBitmap
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow

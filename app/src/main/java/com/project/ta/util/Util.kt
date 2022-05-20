@@ -3,6 +3,7 @@ package com.project.ta.util
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.widget.ImageView
 import androidx.room.TypeConverter
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
@@ -12,9 +13,11 @@ import com.project.ta.R
 import kotlinx.coroutines.NonCancellable.start
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
+import java.net.URL
 
 
-fun toBitmap(byteArray: ByteArray): Bitmap {
+    fun toBitmap(byteArray: ByteArray): Bitmap {
         return BitmapFactory.decodeByteArray(byteArray,0,byteArray.size)
     }
 
@@ -24,13 +27,10 @@ fun toBitmap(byteArray: ByteArray): Bitmap {
         bmp.compress(Bitmap.CompressFormat.PNG,100,outputStream);
         return outputStream.toByteArray()
     }
-    fun filetoBitmap(file: File): Bitmap? {
-        val filePath: String = file.getPath()
-        val bitmap = BitmapFactory.decodeFile(filePath)
-         return bitmap
-    }
 
-fun getProgressDrawable(context: Context): CircularProgressDrawable {
+
+
+    fun getProgressDrawable(context: Context): CircularProgressDrawable {
         return CircularProgressDrawable(context).apply {
             strokeWidth = 10f
             centerRadius = 50f

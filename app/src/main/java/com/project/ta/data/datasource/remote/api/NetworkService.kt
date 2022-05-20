@@ -19,22 +19,8 @@ import com.google.gson.Gson
 import java.io.ByteArrayInputStream
 
 
-interface GoogleMapService {
-    @GET("nearbysearch/json")
-    suspend fun getNearestLocations(
-        @Query("location") location: String,
-        @Query("radius") radius: Int,
-        @Query("type") type: String,
-        @Query("keyword") keyword: String,
-        @Query("key") apiKey: String = BuildConfig.MAP_API_KEY
-    ): GoogleMapServiceResponse
+interface NetworkService {
 
-    @GET("photo")
-    suspend fun getLocationPhoto(
-        @Query("maxwidth") maxWidth: Int,
-        @Query("photo_reference") photoReference: String,
-        @Query("key") apiKey: String = BuildConfig.MAP_API_KEY
-    ): ByteArrayInputStream
 
 
 
@@ -42,7 +28,7 @@ interface GoogleMapService {
     companion object {
 
         private const val BASE_URL: String  = "https://maps.googleapis.com/maps/api/place/";
-        fun create(): GoogleMapService{
+        fun create(): NetworkService{
             val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
 
             val client = OkHttpClient.Builder().addInterceptor(logger).build()
@@ -56,7 +42,7 @@ interface GoogleMapService {
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
-                .create(GoogleMapService::class.java)
+                .create(NetworkService::class.java)
 
 
         }

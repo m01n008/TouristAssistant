@@ -37,6 +37,7 @@ class LocationListAdapter(var nearestLocations: ArrayList<NearestLocationDetails
         private val distanceInKms = view.findViewById<TextView>(R.id.distanceInKms)
         private val locationImg = view.findViewById<ImageView>(R.id.locationImg)
         private val progressDrawable = getProgressDrawable(view.context)
+        val v = view;
         fun bind(nearestLocationDetails: NearestLocationDetails){
             locationName.text = nearestLocationDetails.placeName
 
@@ -44,7 +45,11 @@ class LocationListAdapter(var nearestLocations: ArrayList<NearestLocationDetails
             distanceInKms.text =String.format("%.2f", distance);
             distanceInKms.append(" KM")
 //            locationImg.setImageBitmap(nearestLocationDetails.bmp)
-            locationImg.loadImage(nearestLocationDetails.photoURL,progressDrawable)
+            locationImg.loadImage("https://lh3.googleusercontent.com/places/AAcXr8rRpe_CMob4PUBIsNvLl9sZICQaU3klJhEIM_z2miU3yWlqkr1RoUJmlyMOF7yvZvvdwTaoNj9cY7LEL7TF_QVZhFHIp_v_ROg=s1600-w200",progressDrawable)
+        //            locationImg.loadImage(nearestLocationDetails.photoURL,progressDrawable)
+            v.setOnClickListener(View.OnClickListener {
+
+             })
         }
     }
 }
