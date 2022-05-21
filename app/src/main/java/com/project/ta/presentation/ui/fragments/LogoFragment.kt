@@ -11,6 +11,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class LogoFragment: Fragment(R.layout.fragment_logo) {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         performDefault()

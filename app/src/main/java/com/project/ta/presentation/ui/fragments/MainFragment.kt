@@ -44,10 +44,12 @@ import com.project.ta.presentation.ui.DirectionPointListener
 
 
 import com.project.ta.presentation.ui.GetPathFromLocation
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 @AndroidEntryPoint
 class MainFragment : Fragment(R.layout.fragment_main), EasyPermissions.PermissionCallbacks {
+
 
     companion object {
         private var LOCATION_PERMISSION_GRANTED = false
@@ -81,6 +83,7 @@ class MainFragment : Fragment(R.layout.fragment_main), EasyPermissions.Permissio
         super.onAttach(context)
         activityContext = context
         fragmentContext = context
+        activity?.toolBar?.visibility = View.VISIBLE
     }
 
     override fun onCreateView(

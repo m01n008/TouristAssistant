@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -37,6 +38,7 @@ class MainActivity() : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         fusedLocationProviderClient = FusedLocationProviderClient(this)
         setContentView(R.layout.activity_main)
+        toolBar.visibility = View.GONE
 //        performDefaultFunctions()
 
     }
