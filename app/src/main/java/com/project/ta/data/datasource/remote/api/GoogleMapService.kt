@@ -2,6 +2,10 @@ package com.project.ta.data.datasource.remote.api
 
 import android.graphics.Bitmap
 import android.media.Image
+import android.provider.ContactsContract
+import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayAdapter
+import com.bumptech.glide.load.model.ByteArrayLoader
+import com.google.android.gms.location.places.PlacePhotoMetadataResponse
 import com.project.ta.BuildConfig
 import com.project.ta.data.datasource.GoogleMapServiceResponse
 import com.project.ta.data.datasource.remote.LocationPhoto
@@ -17,6 +21,9 @@ import com.google.gson.GsonBuilder
 
 import com.google.gson.Gson
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import kotlin.jvm.internal.Ref
+
 
 
 interface GoogleMapService {
@@ -34,9 +41,7 @@ interface GoogleMapService {
         @Query("maxwidth") maxWidth: Int,
         @Query("photo_reference") photoReference: String,
         @Query("key") apiKey: String = BuildConfig.MAP_API_KEY
-    ): ByteArrayInputStream
-
-
+    ): PlacePhotoMetadataResponse
 
 
     companion object {

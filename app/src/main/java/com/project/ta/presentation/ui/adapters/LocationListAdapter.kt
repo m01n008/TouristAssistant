@@ -14,9 +14,14 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.fitness.data.Field
+import com.google.android.gms.location.places.Place
+import com.google.android.gms.location.places.PlacePhotoMetadataResponse
+import com.google.android.gms.location.places.Places
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
+import com.project.ta.BuildConfig
 import com.project.ta.R
 import com.project.ta.data.datasource.NearestLocationDetails
 import com.project.ta.util.getDistanceInKms
@@ -91,6 +96,14 @@ class LocationListAdapter(
                 progressDrawable
             )
 
+//            var photoUrl = "https://maps.googleapis.com/maps/api/place/photo
+//            "?"+"maxwidth=400"+
+//            "&photo_reference=Aap_uEA7vb0DDYVJWEaX3O-AtYp77AaswQKSGtDaimt3gt7QCNpdjp1BkdM6acJ96xTec3tsV_ZJNL_JP-lqsVxydG3nh739RE_hepOOL05tfJh2_ranjMadb3VoBYFvF0ma6S24qZ6QJUuV6sSRrhCskSBP5C1myCzsebztMfGvm7ij3gZT
+//            "&key="+ BuildConfig.MAP_API_KEY
+
+
+
+
 
             v.setOnClickListener(View.OnClickListener {
 
@@ -118,9 +131,5 @@ class LocationListAdapter(
                 return@OnLongClickListener true
             })
         }
-
-         private fun singleItemClickListener(v: View){
-
-         }
     }
 }

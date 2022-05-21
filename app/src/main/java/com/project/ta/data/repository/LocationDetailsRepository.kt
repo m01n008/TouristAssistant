@@ -1,14 +1,8 @@
 package com.project.ta.data.repository
 
-import android.graphics.Bitmap
-import androidx.compose.material.ListItem
-import com.google.android.gms.maps.model.LatLng
-import com.project.ta.data.datasource.GoogleMapServiceResponse
 import com.project.ta.data.datasource.NearestLocationDetails
 import com.project.ta.data.datasource.remote.LocationPhoto
 import com.project.ta.data.datasource.remote.api.GoogleMapService
-import com.project.ta.util.toBitmap
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import java.util.*
@@ -19,15 +13,15 @@ class LocationDetailsRepository @Inject constructor(
 
 ) {
     val locationPhotoList: MutableList<LocationPhoto> = arrayListOf()
-    suspend fun getNearestAttractionLocations(): Flow<List<NearestLocationDetails>> {
+    suspend fun getNearestAttractionLocations(lat: Double,lng: Double): Flow<List<NearestLocationDetails>> {
 
-        val mapServiceResponse = googleMapService.getNearestLocations("-33.8670522,151.1957362",1500,"attractions","")
+        val mapServiceResponse = googleMapService.getNearestLocations(lat.toString()+","+lng.toString(),2000,"attractions","")
         return {mapServiceResponse.results}.asFlow()
 
     }
     suspend fun getNearestServiceLocations(lat: Double,lng: Double): Flow<List<NearestLocationDetails>> {
 
-        val mapServiceResponse = googleMapService.getNearestLocations(lat.toString()+","+lng.toString(),1500,"services","")
+        val mapServiceResponse = googleMapService.getNearestLocations(lat.toString()+","+lng.toString(),2000,"services","")
         return {mapServiceResponse.results}.asFlow()
 
 

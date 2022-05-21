@@ -11,6 +11,7 @@ import java.io.IOException
 import java.net.URL
 
 import javax.inject.Inject
+import kotlin.math.ln
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -20,8 +21,8 @@ class MapViewModel @Inject constructor(
     private  var currentServicesLocationsResult: Flow<List<NearestLocationDetails>>? = null
 
 
-    suspend fun updateCurrentAttractions(): Flow<List<NearestLocationDetails>>{
-        val latestResult = locationDetailsRepository.getNearestAttractionLocations()
+    suspend fun updateCurrentAttractions(lat: Double,lng: Double): Flow<List<NearestLocationDetails>>{
+        val latestResult = locationDetailsRepository.getNearestAttractionLocations(lat, lng)
         currentAttractiveLocationsResult = latestResult
         return latestResult
 

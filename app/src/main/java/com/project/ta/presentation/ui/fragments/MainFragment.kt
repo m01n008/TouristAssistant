@@ -46,10 +46,12 @@ import com.project.ta.presentation.ui.DirectionPointListener
 import com.project.ta.presentation.ui.GetPathFromLocation
 
 
-
-
 @AndroidEntryPoint
-class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.PermissionCallbacks {
+class MainFragment : Fragment(R.layout.fragment_main), EasyPermissions.PermissionCallbacks {
+
+    companion object {
+        private var LOCATION_PERMISSION_GRANTED = false
+    }
 
     private val mapViewModel: MapViewModel by viewModels()
     private var getMapDataJob: Job? = null
@@ -59,48 +61,60 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     private val photoReferenceList: MutableList<String> = arrayListOf()
     private val markerList: ArrayList<LatLng> = arrayListOf()
     private val markerImages: MutableList<String> = arrayListOf()
-    var source: LatLng = LatLng(0.0,0.0)
-    var destination:LatLng = LatLng(0.0,0.0)
+    var source: LatLng = LatLng(0.0, 0.0)
+    var destination: LatLng = LatLng(0.0, 0.0)
     private var nearestLocationDetails: List<NearestLocationDetails>? = null
     private val waypoints: ArrayList<LatLng> = arrayListOf()
-//    private lateinit var b: Bundle
+
+    //    private lateinit var b: Bundle
     var photoURLList: MutableList<String> = mutableListOf()
     var photoURL: String? = null
     private lateinit var photoList: List<LocationPhoto>
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     lateinit var activityContext: Context
-    var fragmentContext: Context?  = null
+    var fragmentContext: Context? = null
     private var currLocLatLng: LatLng? = null
-    private val locationListAdapter = LocationListAdapter(arrayListOf(),map,currLocLatLng,fragmentContext)
+    private val locationListAdapter =
+        LocationListAdapter(arrayListOf(), map, currLocLatLng, fragmentContext)
     private var getLocationUpdateJob: Job? = null
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activityContext = context
         fragmentContext = context
     }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
-        fusedLocationProviderClient  = LocationServices.getFusedLocationProviderClient(activityContext)
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(activityContext)
         return super.onCreateView(inflater, container, savedInstanceState)
 
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync {
             map = it
-       }
-        populateData()
+        }
+        if (LOCATION_PERMISSION_GRANTED) {
+            populateData()
+        } else {
+            requestPermissions()
+        }
+
+
+
         btnShowAttracion.setOnClickListener(View.OnClickListener {
             populateData()
         })
 
-        requestPermissions()
+
 
         recyclerViewLocation.apply {
             layoutManager = LinearLayoutManager(context)
@@ -150,7 +164,8 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 
     private fun requestPermissions() {
         if (PermissionUtility.hasLocationPermissions(requireContext())) {
-
+            LOCATION_PERMISSION_GRANTED = true
+            populateData()
 
         } else {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -176,8 +191,10 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-        lifecycleScope.launch{
+        lifecycleScope.launch {
+            LOCATION_PERMISSION_GRANTED = true
             getCurrentLocation()
+
         }
 
     }
@@ -199,115 +216,130 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
-    private fun populateData(){
-      getMapDataJob?.cancel()
-      getMapDataJob = lifecycleScope.launch {
-          getCurrentLocation()
+    private fun populateData() {
+        getMapDataJob?.cancel()
+        getMapDataJob = lifecycleScope.launch {
+            getCurrentLocation()
 //          moveCameratoCurrentLocation()
 //          observeData(currLocLatLng!!.latitude,currLocLatLng!!.longitude)
-//          setImages()
-      }
+//         setImages()
+        }
     }
 
 
-
-
     @SuppressLint("LongLogTag", "MissingPermission")
-    private suspend fun observeData(lat: Double,lng: Double) {
-         var c = 0;
+    private suspend fun observeData(lat: Double, lng: Double) {
+        var c = 0;
 //        mapViewModel
-//        getMapDataJob?.cancel()
-//        getMapDataJob = lifecycleScope.launch {
+        getMapDataJob?.cancel()
+        getMapDataJob = lifecycleScope.launch {
 //           mapViewModel.upd
             progress_circular.visibility = View.VISIBLE
-            mapViewModel.updateCurrentServices(lat,lng).collectLatest { it ->
-            progress_circular.visibility = View.GONE
+            mapViewModel.updateCurrentAttractions(lat, lng).collectLatest { it ->
+                progress_circular.visibility = View.GONE
                 c++
-                Log.d("--insideUpdateCurrentServices call: ",c.toString())
+                Log.d("--insideUpdateCurrentServices call: ", c.toString())
                 nearestLocationDetails = it
 //                locationListAdapter.updateLocations(it)
                 nearestLocationDetails?.forEach { item ->
-                    if(item.photos != null)
-                        if(item.photos[0].photoReference !== null){
+                    if (item.photos != null)
+                        if (item.photos[0].photoReference !== null) {
                             photoReferenceList.add(item.photos!![0].photoReference!!)
+                        } else {
+                            photoReferenceList.add("")
+
                         }
 
-                    markerList.add(LatLng(item.geometry!!.locationCoordinates.lat,item.geometry!!.locationCoordinates.lng))
-                    map?.addMarker(MarkerOptions()
-                        .position(
-                            LatLng(item.geometry!!.locationCoordinates.lat,item.geometry!!.locationCoordinates.lng)
+                    markerList.add(
+                        LatLng(
+                            item.geometry!!.locationCoordinates.lat,
+                            item.geometry!!.locationCoordinates.lng
                         )
-                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMarker(70,70, R.drawable.pin_32)))
-                        )!!.title = item.placeName
+                    )
+                    map?.addMarker(
+                        MarkerOptions()
+                            .position(
+                                LatLng(
+                                    item.geometry!!.locationCoordinates.lat,
+                                    item.geometry!!.locationCoordinates.lng
+                                )
+                            )
+                            .icon(
+                                BitmapDescriptorFactory.fromBitmap(
+                                    resizeMarker(
+                                        70,
+                                        70,
+                                        R.drawable.pin_32
+                                    )
+                                )
+                            )
+                    )!!.title = item.placeName
 //                        .tag = item.placeName +"\n"+
 //                                  item.geometry.locationCoordinates.toString()+""
 
                     Log.d("--NearestLocDetails: ", item.toString())
 
-            }
+                }
 //                createRoute(markerList.first(),markerList.get(markerList.size - 1),waypoints)
-                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(markerList.size - 1),12.0F))
+                map?.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        markerList.get(markerList.size - 1),
+                        12.0F
+                    )
+                )
                 map?.isMyLocationEnabled = true
                 Log.d("--photoReferenceList: ", photoReferenceList.toString())
 
-                    locationListAdapter.updateLocations(
-                        nearestLocationDetails!!,
-                        map,
-                        currLocLatLng,
-                        fragmentContext
-                    )
-
-                }
-
+                locationListAdapter.updateLocations(
+                    nearestLocationDetails!!,
+                    map,
+                    currLocLatLng,
+                    fragmentContext
+                )
 
             }
-
-
 //            photoReferenceList.forEach { it ->
-//                bmp = mapViewModel.getPhoto(it)
-//                bmpList.add(bmp!!)
+//
+//                photoURL =  mapViewModel.getPhoto(it)
+//                photoURLList.add(photoURL!!)
+//
 //            }
-//            for (  i in 0..nearestLocationDetails!!.size){
-//                nearestLocationDetails!![i].bmp = bmpList.get(i)
-//            }
-//            locationListAdapter.updateLocations(nearestLocationDetails!!)
-//            getMapDataJob?.join()
-//        }
+        }
+        getMapDataJob?.join()
+
+    }
 
 
+    private suspend fun setImages() {
+        getImgDataJob?.cancel()
+        getImgDataJob = lifecycleScope.launch {
 
+            photoReferenceList.forEach { it ->
+                photoURL = mapViewModel.getPhoto(it).toString()
+                photoURLList.add(photoURL!!)
 
+            }
+            for (i in 0..nearestLocationDetails!!.size) {
+                nearestLocationDetails!![i].photoURL = photoURLList.get(i)
+            }
+            locationListAdapter.updateLocations(
+                nearestLocationDetails!!,
+                map,
+                currLocLatLng,
+                fragmentContext
+            )
+        }
+    }
 
-
-   private suspend fun setImages(){
-//       getImgDataJob?.cancel()
-//       getImgDataJob = lifecycleScope.launch{
-
-           photoReferenceList.forEach { it ->
-               photoURL =  mapViewModel.getPhoto(it)
-               photoURLList.add(photoURL!!)
-
-           }
-           for (  i in 0..nearestLocationDetails!!.size){
-               nearestLocationDetails!![i].photoURL = photoURLList.get(i)
-           }
-           locationListAdapter.updateLocations(nearestLocationDetails!!, map, currLocLatLng,fragmentContext)
-
-//           }
-
-
-
-   }
-
-  private suspend fun moveCameratoCurrentLocation(){
-        lifecycleScope.launch{
-            map?.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocLatLng,20.0F))
+    private suspend fun moveCameratoCurrentLocation() {
+        lifecycleScope.launch {
+            map?.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocLatLng, 20.0F))
 
         }
 
     }
 
-  private  fun createRoute(source: LatLng,destination: LatLng,wayPoint: ArrayList<LatLng>){
+    private fun createRoute(source: LatLng, destination: LatLng, wayPoint: ArrayList<LatLng>) {
         map?.let {
             GetPathFromLocation(
                 requireContext(),
@@ -319,7 +351,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
                 false,
                 object : DirectionPointListener {
                     override fun onPath(polyLine: PolylineOptions?) {
-                    
+
                     }
                 }).execute()
         }
@@ -330,8 +362,9 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
         val b = bitmapdraw.bitmap
         return Bitmap.createScaledBitmap(b, width, height, false)
     }
+
     @SuppressLint("MissingPermission")
-    private suspend fun getCurrentLocation(){
+    private suspend fun getCurrentLocation() {
         val locationManager = activity
             ?.getSystemService(
                 Context.LOCATION_SERVICE
@@ -340,27 +373,23 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
         fusedLocationProviderClient.lastLocation.addOnCompleteListener {
             var location: Location? = it.result
 
-            if(location != null){
-                currLocLatLng = LatLng(location!!.latitude,location!!.longitude)
-                Log.d("--location!!: ",currLocLatLng.toString())
+            if (location != null) {
+                currLocLatLng = LatLng(location!!.latitude, location!!.longitude)
+                Log.d("--location!!: ", currLocLatLng.toString())
                 lifecycleScope.launch {
-                    observeData(currLocLatLng!!.latitude,currLocLatLng!!.longitude)
+                    observeData(currLocLatLng!!.latitude, currLocLatLng!!.longitude)
                 }
-
-
-            }
-            else{
-                lifecycleScope.launch{
+            } else {
+                lifecycleScope.launch {
                     getLocationUpdates()
                 }
 
             }
 
 
-
-
         }
     }
+
     @SuppressLint("MissingPermission")
     private suspend fun getLocationUpdates() {
         val context = this
@@ -388,10 +417,11 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult?) {
             super.onLocationResult(result)
-            currLocLatLng = LatLng(result?.lastLocation!!.latitude,result?.lastLocation!!.longitude)
-            Log.d("--locationUpdates!!: ",currLocLatLng.toString())
+            currLocLatLng =
+                LatLng(result?.lastLocation!!.latitude, result?.lastLocation!!.longitude)
+            Log.d("--locationUpdates!!: ", currLocLatLng.toString())
             lifecycleScope.launch {
-                observeData(currLocLatLng!!.latitude,currLocLatLng!!.longitude)
+                observeData(currLocLatLng!!.latitude, currLocLatLng!!.longitude)
             }
         }
     }
@@ -543,7 +573,6 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 //        ) + 270).toFloat()
 //        return (-1).toFloat()
 //    }
-
 
 
 }
