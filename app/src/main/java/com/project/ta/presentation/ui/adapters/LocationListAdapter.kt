@@ -9,21 +9,23 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
-import com.project.ta.BuildConfig
 import com.project.ta.R
 import com.project.ta.data.datasource.NearestLocationDetails
-import com.project.ta.domain.MapViewModel
 import com.project.ta.util.getDistanceInKms
 import com.project.ta.util.getProgressDrawable
 import com.project.ta.util.loadImage
-import kotlinx.coroutines.Job
 
 class LocationListAdapter(private var nearestLocations: ArrayList<NearestLocationDetails>,
-private var map: GoogleMap?): RecyclerView.Adapter<LocationListAdapter.LocationViewHolder>() {
+private var map: GoogleMap?, private var currLocLatLng: LatLng? ): RecyclerView.Adapter<LocationListAdapter.LocationViewHolder>() {
 
 
-    fun updateLocations(nearestLocationDetails: List<NearestLocationDetails>,mMap: GoogleMap?){
-        map = mMap
+    fun updateLocations(
+        nearestLocationDetails: List<NearestLocationDetails>,
+        mMap: GoogleMap?,
+        currLocLatLng: LatLng?
+    ){
+        this.currLocLatLng = currLocLatLng
+        this.map = mMap
         nearestLocations.clear()
         nearestLocations.addAll(nearestLocationDetails)
         notifyDataSetChanged()
@@ -35,7 +37,7 @@ private var map: GoogleMap?): RecyclerView.Adapter<LocationListAdapter.LocationV
     )
 
     override fun onBindViewHolder(holder: LocationViewHolder, position: Int) {
-        holder.bind(nearestLocations[position],map)
+        holder.bind(nearestLocations[position],map,currLocLatLng)
     }
 
     override fun getItemCount(): Int = nearestLocations.size
@@ -48,11 +50,12 @@ private var map: GoogleMap?): RecyclerView.Adapter<LocationListAdapter.LocationV
         private  var v = view;
         fun bind(
             nearestLocationDetails: NearestLocationDetails,
-            map: GoogleMap?
+            map: GoogleMap?,
+            currLocLatLng: LatLng?
         ){
             locationName.text = nearestLocationDetails.placeName
 
-            var distance: Double = getDistanceInKms(-33.8670522,151.1957362,nearestLocationDetails.geometry.locationCoordinates.lat,nearestLocationDetails.geometry.locationCoordinates.lng)
+            var distance: Double = getDistanceInKms(currLocLatLng!!.latitude,currLocLatLng!!.longitude,nearestLocationDetails.geometry.locationCoordinates.lat,nearestLocationDetails.geometry.locationCoordinates.lng)
             distanceInKms.text =String.format("%.2f", distance);
             distanceInKms.append(" KM")
             locationImg.loadImage("https://lh3.googleusercontent.com/places/AAcXr8rRpe_CMob4PUBIsNvLl9sZICQaU3klJhEIM_z2miU3yWlqkr1RoUJmlyMOF7yvZvvdwTaoNj9cY7LEL7TF_QVZhFHIp_v_ROg=s1600-w400",progressDrawable)

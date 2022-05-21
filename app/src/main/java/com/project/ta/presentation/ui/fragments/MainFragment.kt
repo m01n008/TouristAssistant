@@ -2,10 +2,8 @@ package com.project.ta.presentation.ui.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.location.LocationManager
@@ -16,13 +14,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.*
-import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
@@ -42,7 +38,6 @@ import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.ArrayList
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.maps.android.compose.GoogleMap
 
 import com.project.ta.presentation.ui.DirectionPointListener
 
@@ -59,7 +54,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     private var getMapDataJob: Job? = null
     private var getImgDataJob: Job? = null
     private var map: GoogleMap? = null
-    private val locationListAdapter = LocationListAdapter(arrayListOf(),map)
+
     private val photoReferenceList: MutableList<String> = arrayListOf()
     private val markerList: ArrayList<LatLng> = arrayListOf()
     private val markerImages: MutableList<String> = arrayListOf()
@@ -74,6 +69,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     lateinit var activityContext: Context
     private var currLocLatLng: LatLng? = null
+    private val locationListAdapter = LocationListAdapter(arrayListOf(),map,currLocLatLng)
     private var getLocationUpdateJob: Job? = null
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -94,10 +90,14 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
         mapView.getMapAsync {
             map = it
        }
+
+        btnShowAttracion.setOnClickListener(View.OnClickListener {
+            populateData()
+        })
 //        b = Bundle()
 //        b.putDouble("lat",map?.myLocation!!.latitude)
 //        b.putDouble("lng",map?.myLocation!!.longitude)
-          populateData()
+//          populateData()
 //        mapView.getMapAsync
 
         requestPermissions()
@@ -215,15 +215,10 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 //        mapViewModel
 //        getMapDataJob?.cancel()
 //        getMapDataJob = lifecycleScope.launch {
+//           mapViewModel.upd
+            startPostponedEnterTransition()
             mapViewModel.updateCurrentServices(lat,lng).collectLatest { it ->
-//
-//                it.filter { value ->
-//                    photoReferenceList.add(photoList[0].photoReference) }
-//                it.forEach { value ->
-//
-//                    photoReferenceList.add(value.photos[0].photoReference!!)
-////                        it.bmp = mapViewModel.getPhoto(it.photos[0].photoReference)
-//                }
+
                 c++
                 Log.d("--insideUpdateCurrentServices call: ",c.toString())
                 nearestLocationDetails = it
@@ -256,7 +251,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 //                }
                 Log.d("--photoReferenceList: ", photoReferenceList.toString())
 
-                    locationListAdapter.updateLocations(nearestLocationDetails!!,map)
+                    locationListAdapter.updateLocations(nearestLocationDetails!!,map,currLocLatLng)
 
                 }
 
@@ -292,7 +287,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
            for (  i in 0..nearestLocationDetails!!.size){
                nearestLocationDetails!![i].photoURL = photoURLList.get(i)
            }
-           locationListAdapter.updateLocations(nearestLocationDetails!!,map)
+           locationListAdapter.updateLocations(nearestLocationDetails!!, map, currLocLatLng)
 
 //           }
 
@@ -332,6 +327,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 
         fusedLocationProviderClient.lastLocation.addOnCompleteListener {
             var location: Location? = it.result
+
             if(location != null){
                 currLocLatLng = LatLng(location!!.latitude,location!!.longitude)
                 Log.d("--location!!: ",currLocLatLng.toString())
