@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/mainFragment">
+    app:startDestination="@id/logoFragment">
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.project.ta.presentation.ui.fragments.MainFragment"
@@ -15,4 +15,12 @@
         android:id="@+id/placeDetailFragment"
         android:name="com.project.ta.presentation.ui.fragments.PlaceDetailFragment"
         android:label="PlaceDetailFragment" />
+    <fragment
+        android:id="@+id/logoFragment"
+        android:name="com.project.ta.presentation.ui.fragments.LogoFragment"
+        android:label="LogoFragment" >
+        <action
+            android:id="@+id/action_logoFragment_to_mainFragment2"
+            app:destination="@id/mainFragment" />
+    </fragment>
 </navigation>

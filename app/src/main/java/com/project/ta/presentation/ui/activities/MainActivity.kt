@@ -90,7 +90,7 @@ class MainActivity() : AppCompatActivity() {
             var b = Bundle()
             b.putDouble("lat", lat)
             b.putDouble("lng", lng)
-            nav_host_fragment_container.findNavController().navigate(R.id.mainFragment, b)
+            nav_host_fragment_container.findNavController().navigate(R.id.logoFragment, b)
         } else {
             //     wait()
         }
