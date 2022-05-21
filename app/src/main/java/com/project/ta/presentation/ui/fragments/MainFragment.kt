@@ -82,33 +82,30 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         fusedLocationProviderClient  = LocationServices.getFusedLocationProviderClient(activityContext)
         return super.onCreateView(inflater, container, savedInstanceState)
+
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        b = savedInstanceState!!
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync {
             map = it
        }
-
-
+        populateData()
         btnShowAttracion.setOnClickListener(View.OnClickListener {
             populateData()
         })
-//        b = Bundle()
-//        b.putDouble("lat",map?.myLocation!!.latitude)
-//        b.putDouble("lng",map?.myLocation!!.longitude)
-//          populateData()
-//        mapView.getMapAsync
 
         requestPermissions()
+
         recyclerViewLocation.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = locationListAdapter
         }
+
     }
 
 
@@ -205,6 +202,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
       getMapDataJob?.cancel()
       getMapDataJob = lifecycleScope.launch {
           getCurrentLocation()
+//          moveCameratoCurrentLocation()
 //          observeData(currLocLatLng!!.latitude,currLocLatLng!!.longitude)
 //          setImages()
       }
@@ -234,25 +232,21 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
                         }
 
                     markerList.add(LatLng(item.geometry!!.locationCoordinates.lat,item.geometry!!.locationCoordinates.lng))
-//                    markerImages.add(item.icon)
-                    map?.addMarker(MarkerOptions().position(LatLng(item.geometry!!.locationCoordinates.lat,item.geometry!!.locationCoordinates.lng))
-                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMarker(70,70, R.drawable.pin_32))))
+                    map?.addMarker(MarkerOptions()
+                        .position(
+                            LatLng(item.geometry!!.locationCoordinates.lat,item.geometry!!.locationCoordinates.lng)
+                        )
+                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMarker(70,70, R.drawable.pin_32)))
+                        )!!.title = item.placeName
+//                        .tag = item.placeName +"\n"+
+//                                  item.geometry.locationCoordinates.toString()+""
+
                     Log.d("--NearestLocDetails: ", item.toString())
 
             }
 //                createRoute(markerList.first(),markerList.get(markerList.size - 1),waypoints)
                 map?.animateCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(markerList.size - 1),12.0F))
                 map?.isMyLocationEnabled = true
-//                GoogleMap.OnCircleClickListener {
-//                    map?.addMarker(MarkerOptions().
-//                    position(it.center)
-//                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMarker(70,70, R.drawable.stop_point))))
-//
-//                }
-
-//                map?.addPolyline(PolylineOptions().addAll(markerList))
-//                markerList.forEach{ it ->
-//                }
                 Log.d("--photoReferenceList: ", photoReferenceList.toString())
 
                     locationListAdapter.updateLocations(
@@ -303,6 +297,14 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 
 
    }
+
+  private suspend fun moveCameratoCurrentLocation(){
+        lifecycleScope.launch{
+            map?.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocLatLng,20.0F))
+
+        }
+
+    }
 
   private  fun createRoute(source: LatLng,destination: LatLng,wayPoint: ArrayList<LatLng>){
         map?.let {

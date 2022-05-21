@@ -3,9 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="80dp"
-    android:background="@color/white">
+    android:background="@drawable/bottomsheet">
     <ImageView
         android:id="@+id/locationImg"
+        android:layout_marginLeft="2dp"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"/>
@@ -22,7 +23,7 @@
             android:text="Location Name"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -30,8 +31,10 @@
     </LinearLayout>
     <TextView
         android:id="@+id/distanceInKms"
-        android:text="distanceInKms"
-        android:textColor="@color/black"
+        android:text="1.10 KM"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="2dp"
+        android:textColor="@color/white"
         android:layout_gravity="bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

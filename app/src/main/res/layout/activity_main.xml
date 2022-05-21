@@ -31,7 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Tourist Assistant"
-                android:textSize="30sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:gravity="center_horizontal"
                 android:textColor="@android:color/white"

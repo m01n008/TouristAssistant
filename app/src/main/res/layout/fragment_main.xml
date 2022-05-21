@@ -10,7 +10,7 @@
         android:id="@+id/clInnerLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@drawable/mapbutton"
+        android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -19,7 +19,6 @@
         >
 
         <androidx.recyclerview.widget.RecyclerView
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
             android:id="@+id/recyclerViewLocation"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -42,19 +41,19 @@
     <Button
         android:id="@+id/btnShowAttracion"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:background="@drawable/mapbutton"
-        android:padding="10dp"
+        android:padding="2dp"
         android:text="Show attractions near me"
-        android:textSize="12sp"
+        android:textSize="10sp"
         android:textColor="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/clInnerLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.95" />
+        app:layout_constraintVertical_bias="0.04" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
