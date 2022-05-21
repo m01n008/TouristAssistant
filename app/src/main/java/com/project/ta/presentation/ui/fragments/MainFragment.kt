@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -218,9 +219,9 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 //        getMapDataJob?.cancel()
 //        getMapDataJob = lifecycleScope.launch {
 //           mapViewModel.upd
-            startPostponedEnterTransition()
+            progress_circular.visibility = View.VISIBLE
             mapViewModel.updateCurrentServices(lat,lng).collectLatest { it ->
-
+            progress_circular.visibility = View.GONE
                 c++
                 Log.d("--insideUpdateCurrentServices call: ",c.toString())
                 nearestLocationDetails = it
