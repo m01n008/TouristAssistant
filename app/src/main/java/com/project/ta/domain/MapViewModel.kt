@@ -26,8 +26,8 @@ class MapViewModel @Inject constructor(
         return latestResult
 
     }
-    suspend fun updateCurrentServices(): Flow<List<NearestLocationDetails>>{
-        val latestResult = locationDetailsRepository.getNearestServiceLocations()
+    suspend fun updateCurrentServices(lat: Double,lng: Double): Flow<List<NearestLocationDetails>>{
+        val latestResult = locationDetailsRepository.getNearestServiceLocations(lat,lng)
         currentServicesLocationsResult = latestResult
         return latestResult
 

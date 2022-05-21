@@ -25,9 +25,9 @@ class LocationDetailsRepository @Inject constructor(
         return {mapServiceResponse.results}.asFlow()
 
     }
-    suspend fun getNearestServiceLocations(): Flow<List<NearestLocationDetails>> {
+    suspend fun getNearestServiceLocations(lat: Double,lng: Double): Flow<List<NearestLocationDetails>> {
 
-        val mapServiceResponse = googleMapService.getNearestLocations("-33.8670522,151.1957362",1500,"services","")
+        val mapServiceResponse = googleMapService.getNearestLocations(lat.toString()+","+lng.toString(),1500,"services","")
         return {mapServiceResponse.results}.asFlow()
 
 

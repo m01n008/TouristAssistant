@@ -2,27 +2,31 @@ package com.project.ta.presentation.ui.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
+import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.location.*
+import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.DirectionsApi
-import com.google.maps.DirectionsApiRequest
-import com.google.maps.GeoApiContext
-import com.google.maps.model.*
-import com.project.ta.BuildConfig
 import com.project.ta.R
 import com.project.ta.data.datasource.NearestLocationDetails
 import com.project.ta.data.datasource.remote.LocationPhoto
@@ -37,6 +41,16 @@ import kotlinx.coroutines.flow.collectLatest
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.ArrayList
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.maps.android.compose.GoogleMap
+
+import com.project.ta.presentation.ui.DirectionPointListener
+
+
+import com.project.ta.presentation.ui.GetPathFromLocation
+
+
+
 
 @AndroidEntryPoint
 class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.PermissionCallbacks {
@@ -45,24 +59,45 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     private var getMapDataJob: Job? = null
     private var getImgDataJob: Job? = null
     private var map: GoogleMap? = null
-    private val locationListAdapter = LocationListAdapter(arrayListOf())
+    private val locationListAdapter = LocationListAdapter(arrayListOf(),map)
     private val photoReferenceList: MutableList<String> = arrayListOf()
-    private val markerList: MutableList<LatLng> = arrayListOf()
+    private val markerList: ArrayList<LatLng> = arrayListOf()
     private val markerImages: MutableList<String> = arrayListOf()
-    var fromPosition: LatLng? = null
-    var toPosition:LatLng? = null
+    var source: LatLng = LatLng(0.0,0.0)
+    var destination:LatLng = LatLng(0.0,0.0)
     private var nearestLocationDetails: List<NearestLocationDetails>? = null
-    private val waypoints: ArrayList<*> = ArrayList<Any?>()
+    private val waypoints: ArrayList<LatLng> = arrayListOf()
+//    private lateinit var b: Bundle
     var photoURLList: MutableList<String> = mutableListOf()
     var photoURL: String? = null
     private lateinit var photoList: List<LocationPhoto>
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    lateinit var activityContext: Context
+    private var currLocLatLng: LatLng? = null
+    private var getLocationUpdateJob: Job? = null
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        activityContext = context
+    }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        fusedLocationProviderClient  = LocationServices.getFusedLocationProviderClient(activityContext)
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+//        b = savedInstanceState!!
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync {
             map = it
        }
-        populateData()
+//        b = Bundle()
+//        b.putDouble("lat",map?.myLocation!!.latitude)
+//        b.putDouble("lng",map?.myLocation!!.longitude)
+          populateData()
 //        mapView.getMapAsync
 
         requestPermissions()
@@ -70,9 +105,6 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
             layoutManager = LinearLayoutManager(context)
             adapter = locationListAdapter
         }
-//        populateData()
-//        observeData()
-//        setImages()
     }
 
 
@@ -83,6 +115,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 
     override fun onStart() {
         super.onStart()
+
         mapView?.onStart()
     }
 
@@ -140,7 +173,12 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
         }
     }
 
-    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {}
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+        lifecycleScope.launch{
+            getCurrentLocation()
+        }
+
+    }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
@@ -162,20 +200,22 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     private fun populateData(){
       getMapDataJob?.cancel()
       getMapDataJob = lifecycleScope.launch {
-          observeData()
+          getCurrentLocation()
+//          observeData(currLocLatLng!!.latitude,currLocLatLng!!.longitude)
 //          setImages()
       }
     }
 
 
 
-    @SuppressLint("LongLogTag")
-    private suspend fun observeData() {
+
+    @SuppressLint("LongLogTag", "MissingPermission")
+    private suspend fun observeData(lat: Double,lng: Double) {
          var c = 0;
 //        mapViewModel
 //        getMapDataJob?.cancel()
 //        getMapDataJob = lifecycleScope.launch {
-            mapViewModel.updateCurrentServices().collectLatest { it ->
+            mapViewModel.updateCurrentServices(lat,lng).collectLatest { it ->
 //
 //                it.filter { value ->
 //                    photoReferenceList.add(photoList[0].photoReference) }
@@ -189,20 +229,36 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
                 nearestLocationDetails = it
 //                locationListAdapter.updateLocations(it)
                 nearestLocationDetails?.forEach { item ->
-                    photoReferenceList.add(item.photos[0].photoReference!!)
-                    markerList.add(LatLng(item.geometry.locationCoordinates.lat,item.geometry.locationCoordinates.lng))
+                    if(item.photos != null)
+                        if(item.photos[0].photoReference !== null){
+                            photoReferenceList.add(item.photos!![0].photoReference!!)
+                        }
+
+                    markerList.add(LatLng(item.geometry!!.locationCoordinates.lat,item.geometry!!.locationCoordinates.lng))
 //                    markerImages.add(item.icon)
-                    map?.addMarker(MarkerOptions().position(LatLng(item.geometry.locationCoordinates.lat,item.geometry.locationCoordinates.lng))
-                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMarker(70,70, R.drawable.stop_point))))
+                    map?.addMarker(MarkerOptions().position(LatLng(item.geometry!!.locationCoordinates.lat,item.geometry!!.locationCoordinates.lng))
+                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMarker(70,70, R.drawable.pin_32))))
                     Log.d("--NearestLocDetails: ", item.toString())
 
             }
-                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(markerList.last(),20.0F))
-                map?.addPolyline(PolylineOptions().addAll(markerList))
+//                createRoute(markerList.first(),markerList.get(markerList.size - 1),waypoints)
+                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(markerList.get(markerList.size - 1),12.0F))
+                map?.isMyLocationEnabled = true
+//                GoogleMap.OnCircleClickListener {
+//                    map?.addMarker(MarkerOptions().
+//                    position(it.center)
+//                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMarker(70,70, R.drawable.stop_point))))
+//
+//                }
+
+//                map?.addPolyline(PolylineOptions().addAll(markerList))
 //                markerList.forEach{ it ->
 //                }
                 Log.d("--photoReferenceList: ", photoReferenceList.toString())
-                locationListAdapter.updateLocations(nearestLocationDetails!!)
+
+                    locationListAdapter.updateLocations(nearestLocationDetails!!,map)
+
+                }
 
 
             }
@@ -223,7 +279,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 
 
 
-    }
+
    private suspend fun setImages(){
 //       getImgDataJob?.cancel()
 //       getImgDataJob = lifecycleScope.launch{
@@ -236,17 +292,100 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
            for (  i in 0..nearestLocationDetails!!.size){
                nearestLocationDetails!![i].photoURL = photoURLList.get(i)
            }
-           locationListAdapter.updateLocations(nearestLocationDetails!!)
+           locationListAdapter.updateLocations(nearestLocationDetails!!,map)
 
 //           }
 
 
 
    }
+
+  private  fun createRoute(source: LatLng,destination: LatLng,wayPoint: ArrayList<LatLng>){
+        map?.let {
+            GetPathFromLocation(
+                requireContext(),
+                source,
+                destination,
+                wayPoint,
+                it,
+                true,
+                false,
+                object : DirectionPointListener {
+                    override fun onPath(polyLine: PolylineOptions?) {
+                    
+                    }
+                }).execute()
+        }
+    }
+
     fun resizeMarker(width: Int, height: Int, drawable: Int): Bitmap? {
         val bitmapdraw = resources.getDrawable(drawable) as BitmapDrawable
         val b = bitmapdraw.bitmap
         return Bitmap.createScaledBitmap(b, width, height, false)
+    }
+    @SuppressLint("MissingPermission")
+    private suspend fun getCurrentLocation(){
+        val locationManager = activity
+            ?.getSystemService(
+                Context.LOCATION_SERVICE
+            ) as LocationManager
+
+        fusedLocationProviderClient.lastLocation.addOnCompleteListener {
+            var location: Location? = it.result
+            if(location != null){
+                currLocLatLng = LatLng(location!!.latitude,location!!.longitude)
+                Log.d("--location!!: ",currLocLatLng.toString())
+                lifecycleScope.launch {
+                    observeData(currLocLatLng!!.latitude,currLocLatLng!!.longitude)
+                }
+
+
+            }
+            else{
+                lifecycleScope.launch{
+                    getLocationUpdates()
+                }
+
+            }
+
+
+
+
+        }
+    }
+    @SuppressLint("MissingPermission")
+    private suspend fun getLocationUpdates() {
+        val context = this
+        getLocationUpdateJob?.cancel()
+        getLocationUpdateJob = lifecycleScope.launch {
+            if (PermissionUtility.hasLocationPermissions(activityContext)) {
+                var request = LocationRequest().apply {
+                    interval = 5000L
+                    fastestInterval = 2000L
+                    priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                }
+                fusedLocationProviderClient.requestLocationUpdates(
+                    request,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+
+            }
+            getLocationUpdateJob?.join()
+
+        }
+
+    }
+
+    val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(result: LocationResult?) {
+            super.onLocationResult(result)
+            currLocLatLng = LatLng(result?.lastLocation!!.latitude,result?.lastLocation!!.longitude)
+            Log.d("--locationUpdates!!: ",currLocLatLng.toString())
+            lifecycleScope.launch {
+                observeData(currLocLatLng!!.latitude,currLocLatLng!!.longitude)
+            }
+        }
     }
 //    private fun createRoute(orgLat: Double, orgLong: Double, destLat: Double, destLng: Double) {
 //        //Toast.makeText(getContext(), "I am called", Toast.LENGTH_SHORT).show();
@@ -400,3 +539,4 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 
 
 }
+

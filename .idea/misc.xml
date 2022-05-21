@@ -3,10 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/xpert/AndroidStudioProjects/TouristAssistant/app/src/main/res/drawable/mapbutton.xml" value="0.2" />
         <entry key="..\:/Users/xpert/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/activity_main.xml" value="0.1" />
-        <entry key="..\:/Users/xpert/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/fragment_main.xml" value="0.1" />
+        <entry key="..\:/Users/xpert/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/fragment_main.xml" value="0.18" />
         <entry key="..\:/Users/xpert/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/fragment_place.xml" value="0.18" />
-        <entry key="..\:/Users/xpert/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/item_location.xml" value="0.1" />
+        <entry key="..\:/Users/xpert/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/item_location.xml" value="0.18" />
         <entry key="..\:/Users/xpert/AndroidStudioProjects/TouristAssistant/app/src/main/res/layout/item_pagerimageview.xml" value="0.1" />
       </map>
     </option>
