@@ -68,12 +68,14 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     private lateinit var photoList: List<LocationPhoto>
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     lateinit var activityContext: Context
+    var fragmentContext: Context?  = null
     private var currLocLatLng: LatLng? = null
-    private val locationListAdapter = LocationListAdapter(arrayListOf(),map,currLocLatLng)
+    private val locationListAdapter = LocationListAdapter(arrayListOf(),map,currLocLatLng,fragmentContext)
     private var getLocationUpdateJob: Job? = null
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activityContext = context
+        fragmentContext = context
     }
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -86,10 +88,12 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 //        b = savedInstanceState!!
+
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync {
             map = it
        }
+
 
         btnShowAttracion.setOnClickListener(View.OnClickListener {
             populateData()
@@ -251,7 +255,12 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
 //                }
                 Log.d("--photoReferenceList: ", photoReferenceList.toString())
 
-                    locationListAdapter.updateLocations(nearestLocationDetails!!,map,currLocLatLng)
+                    locationListAdapter.updateLocations(
+                        nearestLocationDetails!!,
+                        map,
+                        currLocLatLng,
+                        fragmentContext
+                    )
 
                 }
 
@@ -287,7 +296,7 @@ class MainFragment: Fragment(R.layout.fragment_main), EasyPermissions.Permission
            for (  i in 0..nearestLocationDetails!!.size){
                nearestLocationDetails!![i].photoURL = photoURLList.get(i)
            }
-           locationListAdapter.updateLocations(nearestLocationDetails!!, map, currLocLatLng)
+           locationListAdapter.updateLocations(nearestLocationDetails!!, map, currLocLatLng,fragmentContext)
 
 //           }
 

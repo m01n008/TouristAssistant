@@ -1,10 +1,15 @@
 package com.project.ta.presentation.ui.adapters
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -16,14 +21,16 @@ import com.project.ta.util.getProgressDrawable
 import com.project.ta.util.loadImage
 
 class LocationListAdapter(private var nearestLocations: ArrayList<NearestLocationDetails>,
-private var map: GoogleMap?, private var currLocLatLng: LatLng? ): RecyclerView.Adapter<LocationListAdapter.LocationViewHolder>() {
+private var map: GoogleMap?, private var currLocLatLng: LatLng?,private var  fragmentContext: Context? ): RecyclerView.Adapter<LocationListAdapter.LocationViewHolder>() {
 
 
     fun updateLocations(
         nearestLocationDetails: List<NearestLocationDetails>,
         mMap: GoogleMap?,
-        currLocLatLng: LatLng?
+        currLocLatLng: LatLng?,
+        fragmentContext: Context?
     ){
+        this.fragmentContext = fragmentContext
         this.currLocLatLng = currLocLatLng
         this.map = mMap
         nearestLocations.clear()
@@ -37,7 +44,7 @@ private var map: GoogleMap?, private var currLocLatLng: LatLng? ): RecyclerView.
     )
 
     override fun onBindViewHolder(holder: LocationViewHolder, position: Int) {
-        holder.bind(nearestLocations[position],map,currLocLatLng)
+        holder.bind(nearestLocations[position],map,currLocLatLng,fragmentContext)
     }
 
     override fun getItemCount(): Int = nearestLocations.size
@@ -51,7 +58,8 @@ private var map: GoogleMap?, private var currLocLatLng: LatLng? ): RecyclerView.
         fun bind(
             nearestLocationDetails: NearestLocationDetails,
             map: GoogleMap?,
-            currLocLatLng: LatLng?
+            currLocLatLng: LatLng?,
+            fragmentContext: Context?
         ){
             locationName.text = nearestLocationDetails.placeName
 
@@ -70,6 +78,16 @@ private var map: GoogleMap?, private var currLocLatLng: LatLng? ): RecyclerView.
                     nearestLocationDetails.geometry.locationCoordinates.lng),20.0F))
 
 
+            })
+            v.setOnLongClickListener(View.OnLongClickListener {
+               val gmmIntentUri   = Uri.parse("google.navigation:q="
+                       +nearestLocationDetails.geometry.locationCoordinates.lat+
+                       ","+nearestLocationDetails.geometry.locationCoordinates.lng)
+               val mapIntent: Intent  = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                mapIntent.setPackage("com.google.android.apps.maps");
+                var b: Bundle? = Bundle()
+                startActivity(fragmentContext!!,mapIntent,b)
+                return@OnLongClickListener true
             })
         }
     }
